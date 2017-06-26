@@ -344,5 +344,29 @@ int main(void)
     is(*reststr, 'a', "should point at the next char");
   }
 
+
+  {
+    picojson::value v;
+    std::string err = picojson::parse(v, "[{\"id\":0, \"name\":\"M0\"}, {\"id\":1, \"name\":\"M1\"}]");
+    _ok(err.empty(), "simple API no error");
+    _ok(v.is<picojson::array>(), "simple API return type is array");
+    is(v.get<picojson::array>().size(), 2, "simple API array size");
+    _ok(v.get<picojson::array>()[0].is<picojson::object>(), "simple API type OBJ");
+
+    _ok(v.get<picojson::array>()[0].contains("id"), "check contains property");
+    _ok(v.get<picojson::array>()[0].get("id").is<double>(), "check double");
+    is(v.get<picojson::array>()[0].get("id").get<double>(), 0, "check double property value");
+    _ok(v.get<picojson::array>()[0].contains("name"), "check contains property");
+    _ok(v.get<picojson::array>()[0].get("name").is<string>(), "check string");
+    is(v.get<picojson::array>()[0].get("name").get<string>(), "M0", "check string property value");
+
+    _ok(v.get<picojson::array>()[1].contains("id"), "check contains property");
+    _ok(v.get<picojson::array>()[1].get("id").is<double>(), "check double");
+    is(v.get<picojson::array>()[1].get("id").get<double>(), 1, "check double property value");
+    _ok(v.get<picojson::array>()[1].contains("name"), "check contains property");
+    _ok(v.get<picojson::array>()[1].get("name").is<string>(), "check string");
+    is(v.get<picojson::array>()[1].get("name").get<string>(), "M1", "check string property value");
+  }
+
   return done_testing();
 }
