@@ -368,5 +368,44 @@ int main(void)
     is(v.get<picojson::array>()[1].get("name").get<string>(), "M1", "check string property value");
   }
 
+  {
+    /*
+    创建了一个字符串作为JSON格式的文本，里面包含了所有需要检验的字符，然后用你的处理函数来解析这个字符串，得到的结果对象里面的string，和你原来构造的字符串进行比较，是否相同。
+
+    \'  单引号  NO
+    \"  双引号
+    \&  和号    NO
+    \\  反斜杠
+    \n  换行符
+    \r  回车符
+    \t  制表符
+    \b  退格符
+    \f  换页符
+    */
+    picojson::value v;
+    std::string err;
+    //\\\"
+    const char *s = "{\"str\":\"\\/'\\\"&\\\\\\n\\r\\t\\b\\f\"}";
+    //printf("source: %s\n", s);
+    picojson::parse(v, s, s + strlen(s), &err);
+    //printf("error: %s\n", err.c_str());
+    _ok(err.empty(), "should succeed");
+    _ok(v.get("str").is<string>(), "is string");
+    _ok(v.get("str").get<string>() == "/'\"&\\\n\r\t\b\f", "is correct");
+  }
+
+  {
+    picojson::value v;
+    std::string err;
+    //\\\"
+    const char *s = "{\"str\":\"!\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\"}";
+    //printf("source: %s\n", s);
+    picojson::parse(v, s, s + strlen(s), &err);
+    //printf("error: %s\n", err.c_str());
+    _ok(err.empty(), "should succeed");
+    _ok(v.get("str").is<string>(), "is string");
+    _ok(v.get("str").get<string>() == "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", "is correct");
+  }
+
   return done_testing();
 }
